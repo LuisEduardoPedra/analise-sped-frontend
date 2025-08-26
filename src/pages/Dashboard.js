@@ -26,6 +26,7 @@ import {
 } from '@ant-design/icons';
 import api from '../services/api';
 import ResultsTable from '../components/ResultsTable';
+import favicon from '../assets/icon.png';
 
 const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -134,8 +135,8 @@ function Dashboard() {
     <Layout>
       <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
           <Space>
-            <ExperimentOutlined style={{ fontSize: '24px', color: '#1677ff' }} />
-            <Title level={3} style={{ color: 'white', margin: 0 }}>Análise Fiscal</Title>
+            <img src={favicon} alt="icon active" style={{ height: '70px', marginRight:'8px' }} />
+            <Title level={4} style={{ color: 'white', margin: 0 }}>Análise Créditos ICMS</Title>
           </Space>
         <Button icon={<LogoutOutlined />} onClick={handleLogout}>Sair</Button>
       </Header>

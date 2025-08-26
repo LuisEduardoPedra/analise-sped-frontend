@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Form, Input, Button, Typography, Alert, Layout } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import api from '../services/api';
+import logo from '../assets/logo.png';
 
-const { Title } = Typography;
-const { Content } = Layout;
+//
+const { Title, Text } = Typography;
+const { Header, Content } = Layout;
 
 function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   const onFinish = async (values) => {
     setError('');
     setLoading(true);
     try {
-      const response = await api.post('/login', {
-        username: values.username,
-        password: values.password,
-      });
+      const response = await api.post('/login', { username: values.username, password: values.password });
       const { token } = response.data;
       if (token) {
         localStorage.setItem('authToken', token);
@@ -33,11 +39,11 @@ function Login() {
   };
 
   return (
-    // ESTILO CORRIGIDO AQUI para garantir a centralização vertical e horizontal
     <Layout style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
       <Content>
         <Card style={{ width: 400, textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-          <Title level={2}>Análise Fiscal</Title>
+          <img src={logo} alt="Logo da Active" style={{ maxWidth: '150px', marginBottom: '0px', filter:'drop-shadow(1px 1px 2px rgba(0,0,0,0.4))' }} />
+          <Title level={2} style={{ marginTop: '10px' }}>Web-Services Contábeis</Title>
           <Typography.Paragraph type="secondary">
             Faça login para continuar
           </Typography.Paragraph>
