@@ -1,56 +1,11 @@
-import React, { useState } from 'react';
-import { Card, Button, Upload, Space, Typography, Alert, Spin, Row, Col, Divider } from 'antd';
-import { UploadOutlined, SwapOutlined, DeleteOutlined } from '@ant-design/icons';
-import api from '../../services/api';
+import React from 'react';
+import { Card, Button, Upload, Typography, Alert, Spin, Row, Col } from 'antd';
+import { UploadOutlined, SwapOutlined } from '@ant-design/icons';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
-function ConversorFrancesinha() {
-  const [lancamentosFile, setLancamentosFile] = useState(null);
-  const [contasFile, setContasFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleConvert = async () => {
-    if (!lancamentosFile || !contasFile) {
-      setError('Por favor, selecione ambos os arquivos para a conversão.');
-      return;
-    }
-    setError('');
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append('lancamentosFile', lancamentosFile);
-    formData.append('contasFile', contasFile);
-
-    try {
-      const response = await api.post('/convert/francesinha', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        responseType: 'blob', // Importante para receber o arquivo como resposta
-      });
-
-      // Cria um link para download do arquivo CSV retornado
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'conversao.csv';
-      if (contentDisposition) {
-          const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-          if (fileNameMatch.length === 2)
-              fileName = fileNameMatch[1];
-      }
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      
-    } catch (err) {
-      setError('Ocorreu um erro na conversão. Verifique os arquivos ou a conexão.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading }) {
+  const { lancamentosFile, contasFile } = state;
 
   return (
     <Spin spinning={isLoading} tip="Convertendo arquivos..." size="large">
@@ -64,8 +19,8 @@ function ConversorFrancesinha() {
             <Paragraph type="secondary">1. Arquivo de Lançamentos (.csv)</Paragraph>
             <Upload
               accept=".csv"
-              beforeUpload={file => { setLancamentosFile(file); return false; }}
-              onRemove={() => setLancamentosFile(null)} maxCount={1} fileList={lancamentosFile ? [lancamentosFile] : []}
+              beforeUpload={file => { setState({ lancamentosFile: file }); return false; }}
+              onRemove={() => setState({ lancamentosFile: null })} maxCount={1} fileList={lancamentosFile ? [lancamentosFile] : []}
             >
               <Button icon={<UploadOutlined />}>Selecionar Lançamentos</Button>
             </Upload>
@@ -74,8 +29,8 @@ function ConversorFrancesinha() {
             <Paragraph type="secondary">2. Arquivo do Plano de Contas (.csv)</Paragraph>
             <Upload
               accept=".csv"
-              beforeUpload={file => { setContasFile(file); return false; }}
-              onRemove={() => setContasFile(null)} maxCount={1} fileList={contasFile ? [contasFile] : []}
+              beforeUpload={file => { setState({ contasFile: file }); return false; }}
+              onRemove={() => setState({ contasFile: null })} maxCount={1} fileList={contasFile ? [contasFile] : []}
             >
               <Button icon={<UploadOutlined />}>Selecionar Plano de Contas</Button>
             </Upload>
