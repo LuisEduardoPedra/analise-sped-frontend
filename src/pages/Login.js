@@ -16,7 +16,7 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/'); // Navega para a rota raiz protegida
     }
   }, [isAuthenticated, navigate]);
 
@@ -25,6 +25,7 @@ function Login() {
     setLoading(true);
     try {
       await login(values.username, values.password);
+      // A navegação agora é controlada pelo AuthContext e pela lógica do Dashboard
     } catch (err) {
       setError('Usuário ou senha inválidos. Tente novamente.');
     } finally {
