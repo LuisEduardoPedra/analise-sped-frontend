@@ -8,13 +8,15 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Rota pública de Login */}
-        <Route path="/" element={<Login />} />
-
-        {/* Rota protegida para o Dashboard */}
-        <Route path="/dashboard" element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route 
+          path="/*"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          } 
+        />
       </Routes>
     </Router>
   );
