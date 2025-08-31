@@ -10,11 +10,24 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
   const { spedFile, xmlFiles, results, resultsRef } = state;
 
   const handleExportCSV = () => {
-    // ... (lógica de exportação idêntica à anterior)
+    if (!results || results.length === 0) return;
+    const formattedData = results.map(item => ({
+      'Chave NFe': `'${item.nfe_key}`,
+      'Alertas': item.alerts.join('; '),
+      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.',','),
+      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.',','),
+      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.',','),
+      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.',','),
+    }));
+    const csv = Papa.unparse(formattedData, { delimiter: ';' });
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'analise_ipi_st.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
-  
-  // A lógica de exportação é a mesma da versão anterior, então a omiti para economizar espaço
-  // Se precisar do código completo, me avise.
 
   return (
     <Spin spinning={isLoading} tip="Analisando IPI/ST..." size="large">
@@ -72,28 +85,5 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
     </Spin>
   );
 }
-
-// ... Colar a função handleExportCSV completa aqui ...
-AnaliseIpiSt.prototype.handleExportCSV = function() {
-    const { results } = this.props.state;
-    if (!results || results.length === 0) return;
-    const formattedData = results.map(item => ({
-      'Chave NFe': `'${item.nfe_key}`,
-      'Alertas': item.alerts.join('; '),
-      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.',','),
-      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.',','),
-      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.',','),
-      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.',','),
-    }));
-    const csv = Papa.unparse(formattedData, { delimiter: ';' });
-    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', 'analise_ipi_st.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
-
 
 export default AnaliseIpiSt;

@@ -178,7 +178,7 @@ function Dashboard() {
   
   if (view === 'selection' && availableServices.length > 1) {
     return (
-        <MainLayout showSider={false}>
+        <MainLayout showSider={false} onHomeClick={handleGoHome}>
             <ServiceSelection onSelectService={handleSelectService} />
         </MainLayout>
     )
