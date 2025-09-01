@@ -18,7 +18,7 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
           <Col xs={24} md={12}>
             <Paragraph type="secondary">1. Arquivo de Lançamentos (.csv)</Paragraph>
             <Upload
-              accept=".csv"
+              accept=".xls,.xlsx"
               beforeUpload={file => { setState({ lancamentosFile: file }); return false; }}
               onRemove={() => setState({ lancamentosFile: null })} maxCount={1} fileList={lancamentosFile ? [lancamentosFile] : []}
             >
