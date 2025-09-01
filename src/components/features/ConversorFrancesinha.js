@@ -16,7 +16,7 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
       <Card title="Upload de Arquivos">
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
-            <Paragraph type="secondary">1. Arquivo de Lançamentos (.csv)</Paragraph>
+            <Paragraph type="secondary">1. Arquivo de Lançamentos (.xls, .xlsx)</Paragraph>
             <Upload
               accept=".xls,.xlsx"
               beforeUpload={file => { setState({ lancamentosFile: file }); return false; }}
