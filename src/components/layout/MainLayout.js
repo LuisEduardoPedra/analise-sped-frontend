@@ -6,6 +6,7 @@ import {
   SwapOutlined,
   FileTextOutlined,
   HomeOutlined,
+  DollarCircleOutlined, // Novo ícone
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import favicon from '../../assets/icon.png';
@@ -31,6 +32,12 @@ const MainLayout = ({ children, onMenuClick, onHomeClick, activeKey, showSider }
       key: 'converter-francesinha',
       icon: <SwapOutlined />,
       label: 'Conversor Francesinha',
+    },
+    // NOVO ITEM DE MENU
+    hasPermission('converter-receitas-acisa') && {
+      key: 'converter-receitas-acisa',
+      icon: <DollarCircleOutlined />,
+      label: 'Conversor Receitas Acisa',
     },
   ].filter(Boolean);
 

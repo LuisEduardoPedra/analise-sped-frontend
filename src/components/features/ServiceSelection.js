@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Col, Row, Typography } from 'antd';
-import { CalculatorOutlined, FileTextOutlined, SwapOutlined } from '@ant-design/icons';
+import { CalculatorOutlined, FileTextOutlined, SwapOutlined, DollarCircleOutlined } from '@ant-design/icons'; // Ícone adicionado
 import { useAuth } from '../../context/AuthContext';
 
 const { Title, Paragraph } = Typography;
@@ -26,6 +26,14 @@ const services = [
     title: 'Conversor Francesinha',
     description: 'Converte arquivos de lançamento para o formato de importação contábil.',
     icon: <SwapOutlined style={{ fontSize: '36px', color: '#faad14' }} />,
+  },
+  // NOVO SERVIÇO ADICIONADO
+  {
+    key: 'converter-receitas-acisa',
+    permission: 'converter-receitas-acisa',
+    title: 'Conversor Receitas Acisa',
+    description: 'Converte planilhas de receita para o formato de importação contábil.',
+    icon: <DollarCircleOutlined style={{ fontSize: '36px', color: '#13c2c2' }} />,
   },
 ];
 

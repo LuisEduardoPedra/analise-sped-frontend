@@ -4,10 +4,10 @@ import { UploadOutlined, SwapOutlined, TagOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
-function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading }) {
-  const { lancamentosFile, contasFile, classPrefixes } = state;
+// Componente para a nova funcionalidade "Conversor Receitas Acisa"
+function ConversorReceitasAcisa({ state, setState, handleConvert, error, isLoading }) {
+  const { excelFile, contasFile, classPrefixes } = state;
 
-  // Handler para validar a entrada de prefixos
   const handlePrefixesChange = (e) => {
     const { value } = e.target;
     // Permite apenas números, vírgulas, pontos e espaços
@@ -17,20 +17,20 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
 
   return (
     <Spin spinning={isLoading} tip="Convertendo arquivos..." size="large">
-      <Title level={2}>Conversor de Arquivos (Francesinha)</Title>
+      <Title level={2}>Conversor de Receitas (ACISA)</Title>
       <Paragraph>
-        Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato de importação "francesinha".
+        Esta ferramenta converte um arquivo de receitas em Excel e um plano de contas para um formato de importação contábil.
       </Paragraph>
       <Card title="Upload de Arquivos e Filtros">
         <Row gutter={[24, 24]}>
           <Col xs={24} md={12}>
-            <Paragraph type="secondary">1. Arquivo de Lançamentos (.xls, .xlsx)</Paragraph>
+            <Paragraph type="secondary">1. Arquivo de Receitas (.xls, .xlsx)</Paragraph>
             <Upload
               accept=".xls,.xlsx"
-              beforeUpload={file => { setState({ lancamentosFile: file }); return false; }}
-              onRemove={() => setState({ lancamentosFile: null })} maxCount={1} fileList={lancamentosFile ? [lancamentosFile] : []}
+              beforeUpload={file => { setState({ excelFile: file }); return false; }}
+              onRemove={() => setState({ excelFile: null })} maxCount={1} fileList={excelFile ? [excelFile] : []}
             >
-              <Button icon={<UploadOutlined />}>Selecionar Lançamentos</Button>
+              <Button icon={<UploadOutlined />}>Selecionar Arquivo Excel</Button>
             </Upload>
           </Col>
           <Col xs={24} md={12}>
@@ -43,7 +43,6 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
               <Button icon={<UploadOutlined />}>Selecionar Plano de Contas</Button>
             </Upload>
           </Col>
-          {/* NOVO CAMPO DE FILTRO */}
           <Col xs={24}>
             <Paragraph type="secondary" style={{ marginTop: 16 }}>3. Classificação de Conta (Opcional)</Paragraph>
             <Input
@@ -62,7 +61,7 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
         size="large" 
         icon={<SwapOutlined />}
         onClick={handleConvert} 
-        disabled={!lancamentosFile || !contasFile} 
+        disabled={!excelFile || !contasFile} 
         block 
         style={{ marginTop: 24, height: '50px', fontSize: '18px' }}
       >
@@ -74,4 +73,4 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
   );
 }
 
-export default ConversorFrancesinha;
+export default ConversorReceitasAcisa;
