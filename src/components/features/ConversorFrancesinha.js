@@ -45,10 +45,10 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
           </Col>
           {/* NOVO CAMPO DE FILTRO */}
           <Col xs={24}>
-            <Paragraph type="secondary" style={{ marginTop: 16 }}>3. Classificação de Conta (Opcional)</Paragraph>
+            <Paragraph type="secondary" style={{ marginTop: 16 }}>3. Classificação de Conta Sintética para Lançamentos (Opcional)</Paragraph>
             <Input
               prefix={<TagOutlined />}
-              placeholder="Filtre por classificações. Ex: 1.1.2, 1.1.3"
+              placeholder="Filtre por conta sintética. Ex: 1.1.2, 1.1.3"
               value={classPrefixes}
               onChange={handlePrefixesChange}
               allowClear
