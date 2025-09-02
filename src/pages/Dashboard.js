@@ -142,7 +142,7 @@ function Dashboard() {
         const link = document.createElement('a');
         link.href = url;
         const contentDisposition = response.headers['content-disposition'];
-        let fileName = 'conversao.csv';
+        let fileName = 'francesinha_sicredi.csv';
         if (contentDisposition) {
             const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
             if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
@@ -183,7 +183,7 @@ function Dashboard() {
       const link = document.createElement('a');
       link.href = url;
       const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'receitas_acisa.csv';
+      let fileName = 'mensalidades_acisa.csv';
       if (contentDisposition) {
         const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
         if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
