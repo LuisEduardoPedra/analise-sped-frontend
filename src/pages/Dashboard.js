@@ -100,56 +100,77 @@ function Dashboard() {
   };
 
   const handleAnalyze = async () => {
-    const state = featureStates[activeFeature];
-    if (!state || !state.spedFile || !Array.isArray(state.xmlFiles) || state.xmlFiles.length === 0) return;
+  const state = featureStates[activeFeature];
+  if (!state || !state.spedFile || !Array.isArray(state.xmlFiles) || state.xmlFiles.length === 0) {
+    setFeatureState(activeFeature, { error: 'Por favor, selecione SPED e pelo menos um XML.' });
+    return;
+  }
 
-    const analyzeType = activeFeature.replace('analise-', '');
+  const analyzeType = activeFeature.replace('analise-', '');
 
-    // reset erros/resultados
-    setFeatureState(activeFeature, { error: '' });
-    setFeatureState(activeFeature, { results: null });
-    setIsLoading(true);
+  setFeatureState(activeFeature, { error: '' });
+  setFeatureState(activeFeature, { results: null });
+  setIsLoading(true);
 
-    try {
-      const formData = new FormData();
+  try {
+    const formData = new FormData();
 
-      // Normaliza spedFile (pode ser um File direto ou objeto AntD com originFileObj)
-      const spedFileObj = state.spedFile && state.spedFile.originFileObj ? state.spedFile.originFileObj : state.spedFile;
-      if (!spedFileObj) throw new Error('Arquivo SPED inválido.');
-      // terceiro parâmetro para garantir nome do arquivo
-      formData.append('spedFile', spedFileObj, spedFileObj.name || 'sped.txt');
+    // Normaliza SPED
+    const spedFileObj = state.spedFile?.originFileObj ?? state.spedFile;
+    if (!spedFileObj) throw new Error('Arquivo SPED inválido.');
+    formData.append('spedFile', spedFileObj, spedFileObj.name ?? 'sped.txt');
 
-      // Normaliza xmlFiles (cada item pode ser File nativo ou objeto AntD)
-      const xmlFilesToUpload = state.xmlFiles.map(f => (f && f.originFileObj) ? f.originFileObj : f).filter(Boolean);
+    // Normaliza XMLs
+    const xmlFilesToUpload = state.xmlFiles
+      .map(f => f?.originFileObj ?? f)
+      .filter(Boolean);
 
-      if (xmlFilesToUpload.length === 0) {
-        setFeatureState(activeFeature, { error: 'Nenhum arquivo XML válido para envio.' });
-        setIsLoading(false);
-        return;
-      }
-
-      // Appendando cada XML como xmlFiles[] (compatível com backends que esperam array)
-      xmlFilesToUpload.forEach((file, idx) => {
-        formData.append('xmlFiles[]', file, file.name || `xml_${idx}.xml`);
-      });
-
-      if (analyzeType === 'icms' && Array.isArray(state.cfops)) {
-        formData.append('cfopsIgnorados', state.cfops.join(','));
-      }
-
-      // Não forçar Content-Type; deixe o browser/axios setar o boundary automaticamente
-      const response = await api.post(`/analyze/${analyzeType}`, formData, {
-        // headers: { 'Content-Type': 'multipart/form-data' }, // REMOVIDO propositalmente
-      });
-
-      setFeatureState(activeFeature, { results: response.data?.data || [] });
-    } catch (err) {
-      console.error(err);
-      setFeatureState(activeFeature, { error: 'Ocorreu um erro na análise. Verifique os arquivos ou a conexão.' });
-    } finally {
+    if (xmlFilesToUpload.length === 0) {
+      setFeatureState(activeFeature, { error: 'Nenhum arquivo XML válido para envio.' });
       setIsLoading(false);
+      return;
     }
-  };
+
+    // Append dos arquivos - adicionamos duas chaves para compatibilidade:
+    // 1) xmlFiles (append repetido)  2) xmlFiles[] (alguns backends esperam esse formato)
+    xmlFilesToUpload.forEach((file, idx) => {
+      const filename = file.name ?? `xml_${idx}.xml`;
+      formData.append('xmlFiles', file, filename);
+      formData.append('xmlFiles[]', file, filename);
+    });
+
+    if (analyzeType === 'icms' && Array.isArray(state.cfops)) {
+      formData.append('cfopsIgnorados', state.cfops.join(','));
+    }
+
+    // --- DEBUG (temporário) ---
+    // Mostra as chaves do FormData no console para você checar no devtools -> Console
+    // IMPORTANTE: remova esses logs depois de validar.
+    for (const pair of formData.entries()) {
+      // pair[1] pode ser File; mostramos info relevante
+      if (pair[1] instanceof File) {
+        console.log('FormData entry:', pair[0], pair[1].name, pair[1].size, pair[1].type);
+      } else {
+        console.log('FormData entry:', pair[0], pair[1]);
+      }
+    }
+
+    // Não forçar Content-Type — axios/browsers cuidam do boundary automaticamente
+    const response = await api.post(`/analyze/${analyzeType}`, formData);
+
+    setFeatureState(activeFeature, { results: response.data?.data || [] });
+  } catch (err) {
+    console.error(err);
+    // Se o backend retornar JSON com uma mensagem, mostramos
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      'Ocorreu um erro na análise. Verifique os arquivos ou a conexão.';
+    setFeatureState(activeFeature, { error: message });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleFrancesinhaConvert = async () => {
     const state = featureStates['converter-francesinha'];
