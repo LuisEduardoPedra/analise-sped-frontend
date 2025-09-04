@@ -14,10 +14,10 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
     const formattedData = results.map(item => ({
       'Chave NFe': `'${item.nfe_key}`,
       'Alertas': item.alerts.join('; '),
-      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.',','),
-      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.',','),
-      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.',','),
-      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.',','),
+      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.', ','),
+      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.', ','),
+      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.', ','),
+      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.', ','),
     }));
     const csv = Papa.unparse(formattedData, { delimiter: ';' });
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
@@ -44,41 +44,45 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
             <Button icon={<UploadOutlined />}>Selecionar Arquivo SPED (.txt)</Button>
           </Upload>
           <Divider />
-           {/* ===== INÍCIO DA ALTERAÇÃO ===== */}
           <Upload
             accept=".xml"
             multiple
-             // Usando a forma funcional do setState para garantir a atualização correta
-            beforeUpload={(file, fileList) => {
-              setState(prevState => ({
-                xmlFiles: [...prevState.xmlFiles, ...fileList],
-              }));
-              return false; // Previne o upload automático
+            fileList={xmlFiles}
+            beforeUpload={() => false}
+            onChange={({ fileList }) => {
+              setState({ xmlFiles: fileList });
             }}
-             // Limpamos a lista de arquivos para o botão "Limpar" funcionar corretamente
-            onRemove={() => {
-               setState({ xmlFiles: [] });
+            onRemove={(file) => {
+              setState({ xmlFiles: xmlFiles.filter(f => f.uid !== file.uid) });
             }}
-            showUploadList={false} // Essencial para a performance!
           >
             <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
           </Upload>
+
           {xmlFiles.length > 0 && (
             <Space style={{ marginTop: '10px', width: '100%', justifyContent: 'space-between' }}>
               <Text type="success">{xmlFiles.length} arquivos XML selecionados.</Text>
-              <Button size="small" type="link" danger icon={<DeleteOutlined />} onClick={() => setState({ xmlFiles: [] })}>Limpar</Button>
+              <Button
+                size="small"
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => setState({ xmlFiles: [] })}
+              >
+                Limpar
+              </Button>
             </Space>
           )}
-           {/* ===== FIM DA ALTERAÇÃO ===== */}
+
         </Space>
       </Card>
-      
+
       <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar IPI/ST
       </Button>
-      
+
       {error && <Alert message={error} type="error" showIcon style={{ marginTop: 24 }} />}
-      
+
       {results && (
         <div ref={resultsRef}>
           <Card
