@@ -17,7 +17,7 @@ function ConversorFrancesinha({ state, setState, handleConvert, error, isLoading
 
   return (
     <Spin spinning={isLoading} tip="Convertendo arquivos..." size="large">
-      <Title level={2}>Conversor de Arquivos (Francesinha)</Title>
+      <Title level={2}>Conversor de Arquivos (Francesinha Sicredi)</Title>
       <Paragraph>
         Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato de importação "francesinha".
       </Paragraph>

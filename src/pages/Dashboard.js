@@ -92,12 +92,13 @@ function Dashboard() {
   };
 
   const handleAnalyze = async (type) => {
-    const state = featureStates[type];
-    if ((type.startsWith('analise') && (!state.spedFile || state.xmlFiles.length === 0))) return;
+    const featureKey = `analise-${type}`;
+    const state = featureStates[featureKey];
+    if (!state || !state.spedFile || state.xmlFiles.length === 0) return;
 
-    setFeatureState(type, { error: '' });
+    setFeatureState(featureKey, { error: '' });
     setIsLoading(true);
-    setFeatureState(type, { results: null });
+    setFeatureState(featureKey, { results: null });
     
     const formData = new FormData();
     formData.append('spedFile', state.spedFile);
@@ -109,9 +110,9 @@ function Dashboard() {
 
     try {
       const response = await api.post(`/analyze/${type}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setFeatureState(type, { results: response.data.data || [] });
+      setFeatureState(featureKey, { results: response.data.data || [] });
     } catch (err) {
-      setFeatureState(type, { error: `Ocorreu um erro na análise. Verifique os arquivos ou a conexão.` });
+      setFeatureState(featureKey, { error: `Ocorreu um erro na análise. Verifique os arquivos ou a conexão.` });
     } finally {
       setIsLoading(false);
     }
