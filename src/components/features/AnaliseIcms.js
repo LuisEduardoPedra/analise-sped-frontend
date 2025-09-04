@@ -67,9 +67,15 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
               <Divider />
               <Upload
                 accept=".xml"
-                beforeUpload={file => { setState({ xmlFiles: [...xmlFiles, file] }); return false; }}
-                onRemove={file => setState({ xmlFiles: xmlFiles.filter(f => f.uid !== file.uid) })}
-                multiple showUploadList={false}
+                multiple
+
+                onChange={(info) => {
+                  setState({ xmlFiles: info.fileList });
+                }}
+
+                beforeUpload={() => false}
+
+                fileList={xmlFiles}
               >
                 <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
               </Upload>
@@ -114,7 +120,6 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
         </Col>
       </Row>
 
-      {/* ✅ CORREÇÃO: A chamada foi simplificada */}
       <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar Arquivos de ICMS
       </Button>
