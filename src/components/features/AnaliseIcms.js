@@ -55,7 +55,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
           <Card title="1. Upload de Arquivos">
-            <Paragraph type="secondary">Selecione o arquivo SPED e um ou mais arquivos XML de NF-e.</Paragraph>
+            <Paragraph type="secondary">Selecione o arquivo SPED.</Paragraph>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Upload
                 accept=".txt"
@@ -65,6 +65,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
                 <Button icon={<UploadOutlined />}>Selecionar Arquivo SPED (.txt)</Button>
               </Upload>
               <Divider />
+              <Paragraph type="secondary">Selecione um ou mais arquivos XML de NF-e.</Paragraph>
               <Upload
                 accept=".xml"
                 multiple

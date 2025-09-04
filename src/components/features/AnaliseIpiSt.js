@@ -34,7 +34,7 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
       <Title level={2}>Análise de IPI e ST</Title>
       <Paragraph>Esta ferramenta compara os valores de IPI e Substituição Tributária (ST) entre os arquivos SPED e as NF-es em XML.</Paragraph>
       <Card title="Upload de Arquivos">
-        <Paragraph type="secondary">Selecione o arquivo SPED e os arquivos XML de NF-e para a análise.</Paragraph>
+        <Paragraph type="secondary">Selecione o arquivo SPED.</Paragraph>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Upload
             accept=".txt"
@@ -44,6 +44,7 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
             <Button icon={<UploadOutlined />}>Selecionar Arquivo SPED (.txt)</Button>
           </Upload>
           <Divider />
+          <Paragraph type="secondary">Selecione um ou mais arquivos XML de NF-e.</Paragraph>
           <Upload
             accept=".xml"
             multiple
