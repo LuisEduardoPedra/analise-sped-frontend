@@ -47,18 +47,22 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
           <Upload
             accept=".xml"
             multiple
+            showUploadList={false}
             beforeUpload={(file) => {
-              setState(prev => ({
-                xmlFiles: [...prev.xmlFiles, file],
-              }));
-              return false; // impede upload automático
+              setState(prev => {
+                const prevFiles = Array.isArray(prev.xmlFiles) ? prev.xmlFiles : [];
+                const exists = prevFiles.some(
+                  f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+                );
+                return { xmlFiles: exists ? prevFiles : [...prevFiles, file] };
+              });
+              return Upload.LIST_IGNORE;
             }}
-            showUploadList={false} // 🔥 não exibe a lista do AntD
           >
             <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
           </Upload>
 
-          {xmlFiles.length > 0 && (
+          {Array.isArray(xmlFiles) && xmlFiles.length > 0 && (
             <Space style={{ marginTop: '10px', width: '100%', justifyContent: 'space-between' }}>
               <Text type="success">{xmlFiles.length} arquivos XML selecionados.</Text>
               <Button
