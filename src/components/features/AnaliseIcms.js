@@ -66,19 +66,13 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
               </Upload>
               <Divider />
               <Upload
-                accept=".xml"
-                multiple
-
-                onChange={(info) => {
-                  setState({ xmlFiles: info.fileList });
-                }}
-
-                beforeUpload={() => false}
-
-                fileList={xmlFiles}
-              >
-                <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
-              </Upload>
+            accept=".xml"
+            beforeUpload={file => { setState({ xmlFiles: [...xmlFiles, file] }); return false; }}
+            onRemove={file => setState({ xmlFiles: xmlFiles.filter(f => f.uid !== file.uid) })}
+            multiple showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
+          </Upload>
               {xmlFiles.length > 0 && (
                 <Space style={{ marginTop: '10px', width: '100%', justifyContent: 'space-between' }}>
                   <Text type="success">{xmlFiles.length} arquivos XML selecionados.</Text>
