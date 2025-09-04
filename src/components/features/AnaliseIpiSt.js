@@ -61,7 +61,8 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
         </Space>
       </Card>
       
-      <Button type="primary" size="large" onClick={() => handleAnalyze('ipi-st')} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
+      {/* ✅ CORREÇÃO: A chamada foi simplificada */}
+      <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar IPI/ST
       </Button>
       

@@ -6,7 +6,6 @@ import ResultsTable from '../ResultsTable';
 
 const { Title, Paragraph, Text } = Typography;
 
-// O componente agora recebe todo o seu estado e funções como props
 function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
   const { spedFile, xmlFiles, cfops, currentCfop, results, resultsRef } = state;
 
@@ -53,7 +52,6 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
       <Title level={2}>Análise de Créditos de ICMS</Title>
       <Paragraph>Esta ferramenta cruza as informações de arquivos SPED Fiscal com as NF-es em XML para identificar divergências nos valores de ICMS creditados.</Paragraph>
       
-      {/* SEÇÃO DE UPLOAD CORRIGIDA */}
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
           <Card title="1. Upload de Arquivos">
@@ -116,7 +114,8 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
         </Col>
       </Row>
 
-      <Button type="primary" size="large" onClick={() => handleAnalyze('icms')} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
+      {/* ✅ CORREÇÃO: A chamada foi simplificada */}
+      <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar Arquivos de ICMS
       </Button>
       

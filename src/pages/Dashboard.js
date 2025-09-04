@@ -7,15 +7,15 @@ import ServiceSelection from '../components/features/ServiceSelection';
 import AnaliseIcms from '../components/features/AnaliseIcms';
 import AnaliseIpiSt from '../components/features/AnaliseIpiSt';
 import ConversorFrancesinha from '../components/features/ConversorFrancesinha';
-import ConversorReceitasAcisa from '../components/features/ConversorReceitasAcisa'; // 1. Importar o novo componente
+import ConversorReceitasAcisa from '../components/features/ConversorReceitasAcisa';
 
 const initialFeatureState = {
   spedFile: null,
   xmlFiles: [],
-  lancamentosFile: null, // Para Francesinha
-  excelFile: null,       // Para Receitas Acisa
+  lancamentosFile: null,
+  excelFile: null,
   contasFile: null,
-  classPrefixes: '',     // Estado para os prefixos
+  classPrefixes: '',
   results: null,
   error: '',
 };
@@ -36,7 +36,6 @@ function Dashboard() {
     { key: 'analise-icms', permission: 'analise-icms' },
     { key: 'analise-ipi-st', permission: 'analise-ipi-st' },
     { key: 'converter-francesinha', permission: 'converter-francesinha' },
-    // 2. Adicionar o novo serviço na lista
     { key: 'converter-receitas-acisa', permission: 'converter-receitas-acisa' },
   ].filter(s => hasPermission(s.permission)), [hasPermission]);
 
@@ -48,7 +47,6 @@ function Dashboard() {
     'analise-icms': { ...initialFeatureState, cfops: getInitialCfops(), currentCfop: '' },
     'analise-ipi-st': { ...initialFeatureState },
     'converter-francesinha': { ...initialFeatureState },
-    // 3. Adicionar o estado inicial para a nova feature
     'converter-receitas-acisa': { ...initialFeatureState },
   });
 
@@ -91,34 +89,35 @@ function Dashboard() {
     }
   };
 
-  const handleAnalyze = async (type) => {
-    const featureKey = `analise-${type}`;
-    const state = featureStates[featureKey];
+  // ✅ CORREÇÃO: A função agora usa o `activeFeature` do estado para determinar a ação.
+  const handleAnalyze = async () => {
+    const state = featureStates[activeFeature];
     if (!state || !state.spedFile || state.xmlFiles.length === 0) return;
 
-    setFeatureState(featureKey, { error: '' });
+    const analyzeType = activeFeature.replace('analise-', '');
+
+    setFeatureState(activeFeature, { error: '' });
     setIsLoading(true);
-    setFeatureState(featureKey, { results: null });
+    setFeatureState(activeFeature, { results: null });
     
     const formData = new FormData();
     formData.append('spedFile', state.spedFile);
     state.xmlFiles.forEach(file => formData.append('xmlFiles', file));
     
-    if (type === 'icms') {
+    if (analyzeType === 'icms') {
       formData.append('cfopsIgnorados', state.cfops.join(','));
     }
 
     try {
-      const response = await api.post(`/analyze/${type}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setFeatureState(featureKey, { results: response.data.data || [] });
+      const response = await api.post(`/analyze/${analyzeType}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setFeatureState(activeFeature, { results: response.data.data || [] });
     } catch (err) {
-      setFeatureState(featureKey, { error: `Ocorreu um erro na análise. Verifique os arquivos ou a conexão.` });
+      setFeatureState(activeFeature, { error: `Ocorreu um erro na análise. Verifique os arquivos ou a conexão.` });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Renomeado para maior clareza
   const handleFrancesinhaConvert = async () => {
     const state = featureStates['converter-francesinha'];
     if (!state.lancamentosFile || !state.contasFile) {
@@ -159,7 +158,6 @@ function Dashboard() {
     }
   };
 
-  // 4. Nova função para o conversor de receitas
   const handleReceitasAcisaConvert = async () => {
     const state = featureStates['converter-receitas-acisa'];
     if (!state.excelFile || !state.contasFile) {
@@ -217,7 +215,6 @@ function Dashboard() {
         return <AnaliseIpiSt {...commonProps} handleAnalyze={handleAnalyze} />;
       case 'converter-francesinha':
         return <ConversorFrancesinha {...commonProps} handleConvert={handleFrancesinhaConvert} />;
-      // 5. Case para renderizar o novo componente
       case 'converter-receitas-acisa':
         return <ConversorReceitasAcisa {...commonProps} handleConvert={handleReceitasAcisaConvert} />;
       default:
