@@ -31,7 +31,7 @@ const getInitialCfops = () => {
 
 function Dashboard() {
   const { hasPermission } = useAuth();
-  
+
   const availableServices = useMemo(() => [
     { key: 'analise-icms', permission: 'analise-icms' },
     { key: 'analise-ipi-st', permission: 'analise-ipi-st' },
@@ -59,6 +59,7 @@ function Dashboard() {
       setView('selection');
       setActiveFeature(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableServices]);
 
   useEffect(() => {
@@ -67,14 +68,23 @@ function Dashboard() {
     }
   }, [featureStates, activeFeature]);
 
-  const setFeatureState = (featureKey, newState) => {
-    setFeatureStates(prev => ({
-      ...prev,
-      [featureKey]: {
-        ...prev[featureKey],
-        ...newState,
-      },
-    }));
+  /**
+   * setFeatureState agora aceita:
+   * - objeto simples: setFeatureState('analise-icms', { xmlFiles: [] })
+   * - função updater: setFeatureState('analise-icms', prev => ({ xmlFiles: [...prev.xmlFiles, f] }))
+   */
+  const setFeatureState = (featureKey, updater) => {
+    setFeatureStates(prevAll => {
+      const prevFeature = prevAll[featureKey] || {};
+      const nextPartial = (typeof updater === 'function') ? updater(prevFeature) : updater || {};
+      return {
+        ...prevAll,
+        [featureKey]: {
+          ...prevFeature,
+          ...nextPartial,
+        },
+      };
+    });
   };
 
   const handleSelectService = (key) => {
@@ -89,30 +99,53 @@ function Dashboard() {
     }
   };
 
-  // ✅ CORREÇÃO: A função agora usa o `activeFeature` do estado para determinar a ação.
   const handleAnalyze = async () => {
     const state = featureStates[activeFeature];
-    if (!state || !state.spedFile || state.xmlFiles.length === 0) return;
+    if (!state || !state.spedFile || !Array.isArray(state.xmlFiles) || state.xmlFiles.length === 0) return;
 
     const analyzeType = activeFeature.replace('analise-', '');
 
+    // reset erros/resultados
     setFeatureState(activeFeature, { error: '' });
-    setIsLoading(true);
     setFeatureState(activeFeature, { results: null });
-    
-    const formData = new FormData();
-    formData.append('spedFile', state.spedFile);
-    state.xmlFiles.forEach(file => formData.append('xmlFiles', file));
-    
-    if (analyzeType === 'icms') {
-      formData.append('cfopsIgnorados', state.cfops.join(','));
-    }
+    setIsLoading(true);
 
     try {
-      const response = await api.post(`/analyze/${analyzeType}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setFeatureState(activeFeature, { results: response.data.data || [] });
+      const formData = new FormData();
+
+      // Normaliza spedFile (pode ser um File direto ou objeto AntD com originFileObj)
+      const spedFileObj = state.spedFile && state.spedFile.originFileObj ? state.spedFile.originFileObj : state.spedFile;
+      if (!spedFileObj) throw new Error('Arquivo SPED inválido.');
+      // terceiro parâmetro para garantir nome do arquivo
+      formData.append('spedFile', spedFileObj, spedFileObj.name || 'sped.txt');
+
+      // Normaliza xmlFiles (cada item pode ser File nativo ou objeto AntD)
+      const xmlFilesToUpload = state.xmlFiles.map(f => (f && f.originFileObj) ? f.originFileObj : f).filter(Boolean);
+
+      if (xmlFilesToUpload.length === 0) {
+        setFeatureState(activeFeature, { error: 'Nenhum arquivo XML válido para envio.' });
+        setIsLoading(false);
+        return;
+      }
+
+      // Appendando cada XML como xmlFiles[] (compatível com backends que esperam array)
+      xmlFilesToUpload.forEach((file, idx) => {
+        formData.append('xmlFiles[]', file, file.name || `xml_${idx}.xml`);
+      });
+
+      if (analyzeType === 'icms' && Array.isArray(state.cfops)) {
+        formData.append('cfopsIgnorados', state.cfops.join(','));
+      }
+
+      // Não forçar Content-Type; deixe o browser/axios setar o boundary automaticamente
+      const response = await api.post(`/analyze/${analyzeType}`, formData, {
+        // headers: { 'Content-Type': 'multipart/form-data' }, // REMOVIDO propositalmente
+      });
+
+      setFeatureState(activeFeature, { results: response.data?.data || [] });
     } catch (err) {
-      setFeatureState(activeFeature, { error: `Ocorreu um erro na análise. Verifique os arquivos ou a conexão.` });
+      console.error(err);
+      setFeatureState(activeFeature, { error: 'Ocorreu um erro na análise. Verifique os arquivos ou a conexão.' });
     } finally {
       setIsLoading(false);
     }
@@ -128,8 +161,10 @@ function Dashboard() {
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append('lancamentosFile', state.lancamentosFile);
-    formData.append('contasFile', state.contasFile);
+    const lanc = state.lancamentosFile.originFileObj ?? state.lancamentosFile;
+    const contas = state.contasFile.originFileObj ?? state.contasFile;
+    formData.append('lancamentosFile', lanc, lanc.name);
+    formData.append('contasFile', contas, contas.name);
     if (state.classPrefixes) {
       formData.append('classPrefixes', state.classPrefixes);
     }
@@ -152,6 +187,7 @@ function Dashboard() {
         link.click();
         link.remove();
     } catch (err) {
+        console.error(err);
         setFeatureState('converter-francesinha', { error: 'Ocorreu um erro na conversão.' });
     } finally {
         setIsLoading(false);
@@ -168,8 +204,10 @@ function Dashboard() {
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append('excelFile', state.excelFile);
-    formData.append('contasFile', state.contasFile);
+    const excel = state.excelFile.originFileObj ?? state.excelFile;
+    const contas = state.contasFile.originFileObj ?? state.contasFile;
+    formData.append('excelFile', excel, excel.name);
+    formData.append('contasFile', contas, contas.name);
     if (state.classPrefixes) {
       formData.append('classPrefixes', state.classPrefixes);
     }
@@ -192,6 +230,7 @@ function Dashboard() {
       link.click();
       link.remove();
     } catch (err) {
+      console.error(err);
       setFeatureState('converter-receitas-acisa', { error: 'Ocorreu um erro na conversão.' });
     } finally {
       setIsLoading(false);
@@ -200,10 +239,11 @@ function Dashboard() {
 
   const renderActiveComponent = () => {
     const currentState = { ...featureStates[activeFeature], resultsRef };
-    
+
     const commonProps = {
       state: currentState,
-      setState: (newState) => setFeatureState(activeFeature, newState),
+      // setState pode receber objeto ou função; passamos direto para o setFeatureState que lida com ambos
+      setState: (newStateOrUpdater) => setFeatureState(activeFeature, newStateOrUpdater),
       isLoading: isLoading,
       error: currentState.error,
     };
@@ -222,7 +262,7 @@ function Dashboard() {
         return null;
     }
   };
-  
+
   if (view === 'selection' && availableServices.length > 1) {
     return (
         <MainLayout showSider={false} onHomeClick={handleGoHome}>
