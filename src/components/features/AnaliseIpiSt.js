@@ -47,14 +47,13 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
           <Upload
             accept=".xml"
             multiple
-            fileList={xmlFiles}
-            beforeUpload={() => false}
-            onChange={({ fileList }) => {
-              setState({ xmlFiles: fileList });
+            beforeUpload={(file) => {
+              setState(prev => ({
+                xmlFiles: [...prev.xmlFiles, file],
+              }));
+              return false; // impede upload automático
             }}
-            onRemove={(file) => {
-              setState({ xmlFiles: xmlFiles.filter(f => f.uid !== file.uid) });
-            }}
+            showUploadList={false} // 🔥 não exibe a lista do AntD
           >
             <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
           </Upload>
@@ -73,6 +72,7 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
               </Button>
             </Space>
           )}
+
 
         </Space>
       </Card>
