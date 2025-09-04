@@ -32,8 +32,8 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
     const formattedData = results.map(item => ({
       'Chave NFe': `'${item.nfe_key}`,
       'Status': item.alerts.join('; '),
-      'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.',','),
-      'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.',','),
+      'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
+      'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
       'CFOPs SPED': item.data.cfops_sped.join(', '),
       'Numero da Nota': item.data.doc_number,
     }));
@@ -51,28 +51,29 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
     <Spin spinning={isLoading} tip="Analisando arquivos de ICMS..." size="large">
       <Title level={2}>Análise de Créditos de ICMS</Title>
       <Paragraph>Esta ferramenta cruza as informações de arquivos SPED Fiscal com as NF-es em XML para identificar divergências nos valores de ICMS creditados.</Paragraph>
-      
+
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
           <Card title="1. Upload de Arquivos">
             <Paragraph type="secondary">Selecione o arquivo SPED e um ou mais arquivos XML de NF-e.</Paragraph>
             <Space direction="vertical" style={{ width: '100%' }}>
               <Upload
-                accept=".txt"
-                beforeUpload={file => { setState({ spedFile: file }); return false; }}
-                onRemove={() => setState({ spedFile: null })} maxCount={1} fileList={spedFile ? [spedFile] : []}
+                accept=".xml"
+                multiple
+                beforeUpload={file => {
+                  setState(prevState => ({
+                    xmlFiles: [...prevState.xmlFiles, file],
+                  }));
+                  return false; 
+                }}
+                onRemove={() => {
+
+                  return true;
+                }}
+                showUploadList={false} 
               >
-                <Button icon={<UploadOutlined />}>Selecionar Arquivo SPED (.txt)</Button>
+                <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
               </Upload>
-              <Divider />
-              <Upload
-            accept=".xml"
-            beforeUpload={file => { setState({ xmlFiles: [...xmlFiles, file] }); return false; }}
-            onRemove={file => setState({ xmlFiles: xmlFiles.filter(f => f.uid !== file.uid) })}
-            multiple showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
-          </Upload>
               {xmlFiles.length > 0 && (
                 <Space style={{ marginTop: '10px', width: '100%', justifyContent: 'space-between' }}>
                   <Text type="success">{xmlFiles.length} arquivos XML selecionados.</Text>
@@ -117,9 +118,9 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
       <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar Arquivos de ICMS
       </Button>
-      
+
       {error && <Alert message={error} type="error" showIcon style={{ marginTop: 24 }} />}
-      
+
       {results && (
         <div ref={resultsRef}>
           <Card

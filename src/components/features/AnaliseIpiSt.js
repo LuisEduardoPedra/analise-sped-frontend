@@ -14,10 +14,10 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
     const formattedData = results.map(item => ({
       'Chave NFe': `'${item.nfe_key}`,
       'Alertas': item.alerts.join('; '),
-      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.',','),
-      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.',','),
-      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.',','),
-      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.',','),
+      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.', ','),
+      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.', ','),
+      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.', ','),
+      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.', ','),
     }));
     const csv = Papa.unparse(formattedData, { delimiter: ';' });
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
@@ -47,11 +47,15 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
           <Upload
             accept=".xml"
             multiple
-            onChange={(info) => {
-              setState({ xmlFiles: info.fileList });
+            // A mesma lógica de atualização funcional do estado.
+            beforeUpload={file => {
+              setState(prevState => ({
+                xmlFiles: [...prevState.xmlFiles, file],
+              }));
+              return false;
             }}
-            beforeUpload={() => false}
-            fileList={xmlFiles}
+            onRemove={() => true}
+            showUploadList={false}
           >
             <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
           </Upload>
@@ -63,14 +67,14 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
           )}
         </Space>
       </Card>
-      
+
       {/* ✅ CORREÇÃO: A chamada foi simplificada */}
       <Button type="primary" size="large" onClick={handleAnalyze} disabled={!spedFile || xmlFiles.length === 0} block style={{ marginTop: 24, height: '50px', fontSize: '18px' }}>
         Analisar IPI/ST
       </Button>
-      
+
       {error && <Alert message={error} type="error" showIcon style={{ marginTop: 24 }} />}
-      
+
       {results && (
         <div ref={resultsRef}>
           <Card
