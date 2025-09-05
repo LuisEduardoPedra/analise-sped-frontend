@@ -1,7 +1,7 @@
 import React from 'react';
 import Papa from 'papaparse';
-import { Card, Button, Upload, Space, Typography, Alert, Spin, Divider } from 'antd';
-import { UploadOutlined, DeleteOutlined, FileExcelOutlined } from '@ant-design/icons';
+import { Card, Button, Upload, Space, Typography, Alert, Spin, Divider, message, Tooltip } from 'antd';
+import { UploadOutlined, DeleteOutlined, FileExcelOutlined, CopyOutlined } from '@ant-design/icons';
 import ResultsTable from '../ResultsTable';
 
 const { Title, Paragraph, Text } = Typography;
@@ -27,6 +27,28 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleCopyToClipboard = () => {
+    if (!results || results.length === 0) {
+      message.warning('Não há dados para copiar.');
+      return;
+    }
+    const formattedData = results.map(item => ({
+      'Chave NFe': `'${item.nfe_key}`,
+      'Alertas': item.alerts.join('; '),
+      'IPI XML (R$)': item.data.ipi_value_xml.toFixed(2).replace('.', ','),
+      'IPI SPED (R$)': item.data.ipi_value_sped.toFixed(2).replace('.', ','),
+      'ST XML (R$)': item.data.st_value_xml.toFixed(2).replace('.', ','),
+      'ST SPED (R$)': item.data.st_value_sped.toFixed(2).replace('.', ','),
+    }));
+    const csv = Papa.unparse(formattedData, { delimiter: ';' });
+    navigator.clipboard.writeText(csv).then(() => {
+      message.success('Tabela copiada para a área de transferência!');
+    }, (err) => {
+      message.error('Falha ao copiar a tabela.');
+      console.error('Erro ao copiar:', err);
+    });
   };
 
   return (
@@ -94,7 +116,14 @@ function AnaliseIpiSt({ state, setState, handleAnalyze, error, isLoading }) {
             title={
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 Resultados da Análise de IPI/ST
-                <Button icon={<FileExcelOutlined />} onClick={handleExportCSV}>Exportar para CSV</Button>
+                <Space>
+                  <Tooltip title="Copiar CSV">
+                    <Button icon={<CopyOutlined />} onClick={handleCopyToClipboard} />
+                  </Tooltip>
+                  <Button icon={<FileExcelOutlined />} onClick={handleExportCSV}>
+                    Exportar para CSV
+                  </Button>
+                </Space>
               </div>
             }
             style={{ marginTop: 24 }}

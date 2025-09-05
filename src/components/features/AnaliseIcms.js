@@ -1,7 +1,7 @@
 import React from 'react';
 import Papa from 'papaparse';
-import { Card, Button, Upload, Input, Tag, Space, Typography, Alert, Spin, Row, Col, Divider } from 'antd';
-import { UploadOutlined, PlusOutlined, DeleteOutlined, FileExcelOutlined } from '@ant-design/icons';
+import { Card, Button, Upload, Input, Tag, Space, Typography, Alert, Spin, Row, Col, Divider, message, Tooltip } from 'antd';
+import { UploadOutlined, PlusOutlined, DeleteOutlined, FileExcelOutlined, CopyOutlined } from '@ant-design/icons';
 import ResultsTable from '../ResultsTable';
 
 const { Title, Paragraph, Text } = Typography;
@@ -30,12 +30,12 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
   const handleExportCSV = () => {
     if (!results || results.length === 0) return;
     const formattedData = results.map(item => ({
-        'Chave NFe': `'${item.nfe_key}`,
-        'Status': Array.isArray(item.alerts) ? item.alerts.join('; ') : '-',
-        'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
-        'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
-        'CFOPs SPED': Array.isArray(item.data.cfops_sped) ? item.data.cfops_sped.join(', ') : '-',
-        'Numero da Nota': item.data.doc_number,
+      'Chave NFe': `'${item.nfe_key}`,
+      'Status': Array.isArray(item.alerts) ? item.alerts.join('; ') : '-',
+      'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
+      'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
+      'CFOPs SPED': Array.isArray(item.data.cfops_sped) ? item.data.cfops_sped.join(', ') : '-',
+      'Numero da Nota': item.data.doc_number,
     }));
     const csv = Papa.unparse(formattedData, { delimiter: ';' });
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
@@ -45,6 +45,28 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleCopyToClipboard = () => {
+    if (!results || results.length === 0) {
+      message.warning('Não há dados para copiar.');
+      return;
+    }
+    const formattedData = results.map(item => ({
+      'Chave NFe': `'${item.nfe_key}`,
+      'Status': Array.isArray(item.alerts) ? item.alerts.join('; ') : '-',
+      'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
+      'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
+      'CFOPs SPED': Array.isArray(item.data.cfops_sped) ? item.data.cfops_sped.join(', ') : '-',
+      'Numero da Nota': item.data.doc_number,
+    }));
+    const csv = Papa.unparse(formattedData, { delimiter: ';' });
+    navigator.clipboard.writeText(csv).then(() => {
+      message.success('Tabela copiada para a área de transferência!');
+    }, (err) => {
+      message.error('Falha ao copiar a tabela.');
+      console.error('Erro ao copiar:', err);
+    });
   };
 
   return (
@@ -69,7 +91,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
               <Upload
                 accept=".xml"
                 multiple
-                showUploadList={false} 
+                showUploadList={false}
                 beforeUpload={(file) => {
                   setState(prev => {
                     const prevFiles = Array.isArray(prev.xmlFiles) ? prev.xmlFiles : [];
@@ -78,7 +100,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
                     );
                     return { xmlFiles: exists ? prevFiles : [...prevFiles, file] };
                   });
-                  return Upload.LIST_IGNORE; 
+                  return Upload.LIST_IGNORE;
                 }}
               >
                 <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>
@@ -146,7 +168,14 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
             title={
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 Resultados da Análise de ICMS
-                <Button icon={<FileExcelOutlined />} onClick={handleExportCSV}>Exportar para CSV</Button>
+                <Space>
+                  <Tooltip title="Copiar CSV">
+                    <Button icon={<CopyOutlined />} onClick={handleCopyToClipboard} />
+                  </Tooltip>
+                  <Button icon={<FileExcelOutlined />} onClick={handleExportCSV}>
+                    Exportar para CSV
+                  </Button>
+                </Space>
               </div>
             }
             style={{ marginTop: 24 }}
