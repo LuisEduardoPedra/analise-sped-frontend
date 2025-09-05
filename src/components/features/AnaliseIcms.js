@@ -30,12 +30,12 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
   const handleExportCSV = () => {
     if (!results || results.length === 0) return;
     const formattedData = results.map(item => ({
-      'Chave NFe': `'${item.nfe_key}`,
-      'Status': item.alerts.join('; '),
-      'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
-      'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
-      'CFOPs SPED': item.data.cfops_sped.join(', '),
-      'Numero da Nota': item.data.doc_number,
+        'Chave NFe': `'${item.nfe_key}`,
+        'Status': Array.isArray(item.alerts) ? item.alerts.join('; ') : '-',
+        'ICMS XML (R$)': item.data.icms_xml.toFixed(2).replace('.', ','),
+        'ICMS SPED (R$)': item.data.icms_sped.toFixed(2).replace('.', ','),
+        'CFOPs SPED': Array.isArray(item.data.cfops_sped) ? item.data.cfops_sped.join(', ') : '-',
+        'Numero da Nota': item.data.doc_number,
     }));
     const csv = Papa.unparse(formattedData, { delimiter: ';' });
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
@@ -69,7 +69,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
               <Upload
                 accept=".xml"
                 multiple
-                showUploadList={false} // não renderiza a lista do AntD
+                showUploadList={false} 
                 beforeUpload={(file) => {
                   setState(prev => {
                     const prevFiles = Array.isArray(prev.xmlFiles) ? prev.xmlFiles : [];
@@ -78,7 +78,7 @@ function AnaliseIcms({ state, setState, handleAnalyze, error, isLoading }) {
                     );
                     return { xmlFiles: exists ? prevFiles : [...prevFiles, file] };
                   });
-                  return Upload.LIST_IGNORE; // impede o AntD de gerenciar a lista (sem UI pesada)
+                  return Upload.LIST_IGNORE; 
                 }}
               >
                 <Button icon={<UploadOutlined />}>Selecionar Arquivos NF-e (.xml)</Button>

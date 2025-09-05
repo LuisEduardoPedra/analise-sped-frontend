@@ -1,5 +1,7 @@
 import React from 'react';
-import { Table, Tag, Tooltip } from 'antd';
+import { Table, Tag, Tooltip, Button, message } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import Papa from 'papaparse';
 
 const getStatusTag = (statusCode) => {
     switch (statusCode) {
@@ -11,10 +13,52 @@ const getStatusTag = (statusCode) => {
     }
 };
 
+const handleCopyToClipboard = (data, columns) => {
+    if (!data || data.length === 0) {
+        message.warning('Não há dados para copiar.');
+        return;
+    }
+
+    // Extrai os cabeçalhos da tabela
+    const headers = columns.map(col => col.title).filter(title => title !== 'Status');
+
+    // Mapeia os dados para o formato CSV
+    const csvData = data.map(item => {
+        return columns
+            .filter(col => col.key !== 'status_code' && col.key !== 'actions')
+            .map(col => {
+                let value;
+                if (Array.isArray(col.dataIndex)) {
+                    value = col.dataIndex.reduce((acc, key) => (acc && acc[key] !== undefined) ? acc[key] : '', item);
+                } else {
+                    value = item[col.dataIndex];
+                }
+
+                if (typeof value === 'number') {
+                    return `R$ ${value.toFixed(2).replace('.', ',')}`;
+                }
+                if (Array.isArray(value)) {
+                    return value.join(', ');
+                }
+                return value;
+            }).join(';');
+    });
+
+
+    const csvString = [headers.join(';'), ...csvData].join('\n');
+
+    navigator.clipboard.writeText(csvString).then(() => {
+        message.success('Tabela copiada para a área de transferência!');
+    }, (err) => {
+        message.error('Falha ao copiar a tabela.');
+        console.error('Erro ao copiar:', err);
+    });
+};
+
 const columnsIcms = [
     {
         title: 'Chave NF-e', dataIndex: 'nfe_key', key: 'nfe_key', width: 380,
-        render: text => <Tooltip title={text}><div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{`${text.substring(0, 25)}...`}</div></Tooltip>
+        render: text => <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{text}</div>
     },
     { title: 'Nº Nota', dataIndex: ['data', 'doc_number'], key: 'doc_number' },
     {
@@ -38,7 +82,7 @@ const columnsIcms = [
 const columnsIpiSt = [
     {
         title: 'Chave NF-e', dataIndex: 'nfe_key', key: 'nfe_key', width: 380,
-        render: text => <Tooltip title={text}><div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{`${text.substring(0, 25)}...`}</div></Tooltip>
+        render: text => <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>{text}</div>
     },
     {
         title: 'IPI XML', dataIndex: ['data', 'ipi_value_xml'], key: 'ipi_xml',
@@ -74,13 +118,23 @@ function ResultsTable({ data, type }) {
     const columns = type === 'icms' ? columnsIcms : columnsIpiSt;
 
     return (
-        <Table
-            columns={columns}
-            dataSource={data}
-            rowKey="nfe_key"
-            scroll={{ x: 1200 }}
-            size="small"
-        />
+        <div>
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                <Button
+                    icon={<CopyOutlined />}
+                    onClick={() => handleCopyToClipboard(data, columns)}
+                >
+                    Copiar CSV
+                </Button>
+            </div>
+            <Table
+                columns={columns}
+                dataSource={data}
+                rowKey="nfe_key"
+                scroll={{ x: 1200 }}
+                size="small"
+            />
+        </div>
     );
 }
 
