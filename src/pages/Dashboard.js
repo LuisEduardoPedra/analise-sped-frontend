@@ -276,7 +276,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await api.post('/convert/ataloni-recebimentos', formData, {
+      const response = await api.post('/convert/atolini-recebimentos', formData, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -322,7 +322,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await api.post('/convert/ataloni-pagamentos', formData, {
+      const response = await api.post('/convert/atolini-pagamentos', formData, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));

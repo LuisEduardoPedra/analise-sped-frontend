@@ -50,20 +50,20 @@ function ConversorAtoliniPagamentos({ state, setState, handleConvert, error, isL
             </Upload>
           </Col>
           <Col xs={24} md={12}>
-            <Paragraph type="secondary" style={{ marginTop: 16 }}>3. Filtro para contas Crédito</Paragraph>
+            <Paragraph type="secondary" style={{ marginTop: 16 }}>3. Filtro para contas Passivo</Paragraph>
             <Input
               prefix={<TagOutlined />}
-              placeholder="Ex: 1.1.1, 1.2.3"
+              placeholder="Ex: 2.1.1, 2.1.1.01"
               value={creditPrefixes}
               onChange={handleCreditChange}
               allowClear
             />
           </Col>
           <Col xs={24} md={12}>
-            <Paragraph type="secondary" style={{ marginTop: 16 }}>4. Filtro para contas Débito</Paragraph>
+            <Paragraph type="secondary" style={{ marginTop: 16 }}>4. Filtro para contas Ativo</Paragraph>
             <Input
               prefix={<TagOutlined />}
-              placeholder="Ex: 2.1.1, 2.2.3"
+              placeholder="Ex: 1.1.1, 1.1.1.02"
               value={debitPrefixes}
               onChange={handleDebitChange}
               allowClear
