@@ -8,6 +8,8 @@ import AnaliseIcms from '../components/features/AnaliseIcms';
 import AnaliseIpiSt from '../components/features/AnaliseIpiSt';
 import ConversorFrancesinha from '../components/features/ConversorFrancesinha';
 import ConversorReceitasAcisa from '../components/features/ConversorReceitasAcisa';
+import ConversorAtoliniPagamentos from '../components/features/ConversorAtoliniPagamentos';
+import ConversorAtoliniRecebimentos from '../components/features/ConversorAtoliniRecebimentos';
 
 const initialFeatureState = {
   spedFile: null,
@@ -16,6 +18,8 @@ const initialFeatureState = {
   excelFile: null,
   contasFile: null,
   classPrefixes: '',
+  creditPrefixes: '',
+  debitPrefixes: '',
   results: null,
   error: '',
 };
@@ -37,6 +41,8 @@ function Dashboard() {
     { key: 'analise-ipi-st', permission: 'analise-ipi-st' },
     { key: 'converter-francesinha', permission: 'converter-francesinha' },
     { key: 'converter-receitas-acisa', permission: 'converter-receitas-acisa' },
+    { key: 'converter-atolini-recebimentos', permission: 'converter-atolini-recebimentos' },
+    { key: 'converter-atolini-pagamentos', permission: 'converter-atolini-pagamentos' },
   ].filter(s => hasPermission(s.permission)), [hasPermission]);
 
   const [view, setView] = useState('selection');
@@ -48,6 +54,8 @@ function Dashboard() {
     'analise-ipi-st': { ...initialFeatureState },
     'converter-francesinha': { ...initialFeatureState },
     'converter-receitas-acisa': { ...initialFeatureState },
+    'converter-atolini-recebimentos': { ...initialFeatureState },
+    'converter-atolini-pagamentos': { ...initialFeatureState },
   });
 
   const resultsRef = useRef(null);
@@ -141,18 +149,6 @@ function Dashboard() {
 
     if (analyzeType === 'icms' && Array.isArray(state.cfops)) {
       formData.append('cfopsIgnorados', state.cfops.join(','));
-    }
-
-    // --- DEBUG (temporário) ---
-    // Mostra as chaves do FormData no console para você checar no devtools -> Console
-    // IMPORTANTE: remova esses logs depois de validar.
-    for (const pair of formData.entries()) {
-      // pair[1] pode ser File; mostramos info relevante
-      if (pair[1] instanceof File) {
-        console.log('FormData entry:', pair[0], pair[1].name, pair[1].size, pair[1].type);
-      } else {
-        console.log('FormData entry:', pair[0], pair[1]);
-      }
     }
 
     // Não forçar Content-Type — axios/browsers cuidam do boundary automaticamente
@@ -258,6 +254,98 @@ function Dashboard() {
     }
   };
 
+  const handleAtoliniRecebimentosConvert = async () => {
+    const state = featureStates['converter-atolini-recebimentos'];
+    if (!state.lancamentosFile || !state.contasFile) {
+      setFeatureState('converter-atolini-recebimentos', { error: 'Por favor, selecione ambos os arquivos.' });
+      return;
+    }
+    setFeatureState('converter-atolini-recebimentos', { error: '' });
+    setIsLoading(true);
+
+    const formData = new FormData();
+    const lanc = state.lancamentosFile.originFileObj ?? state.lancamentosFile;
+    const contas = state.contasFile.originFileObj ?? state.contasFile;
+    formData.append('lancamentosFile', lanc, lanc.name);
+    formData.append('contasFile', contas, contas.name);
+    if (state.creditPrefixes) {
+      formData.append('creditPrefixes', state.creditPrefixes);
+    }
+    if (state.debitPrefixes) {
+      formData.append('debitPrefixes', state.debitPrefixes);
+    }
+
+    try {
+      const response = await api.post('/convert/ataloni-recebimentos', formData, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'atolini_recebimentos.txt';
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
+      }
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(err);
+      setFeatureState('converter-atolini-recebimentos', { error: 'Ocorreu um erro na conversão.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAtoliniPagamentosConvert = async () => {
+    const state = featureStates['converter-atolini-pagamentos'];
+    if (!state.lancamentosFile || !state.contasFile) {
+      setFeatureState('converter-atolini-pagamentos', { error: 'Por favor, selecione ambos os arquivos.' });
+      return;
+    }
+    setFeatureState('converter-atolini-pagamentos', { error: '' });
+    setIsLoading(true);
+
+    const formData = new FormData();
+    const lanc = state.lancamentosFile.originFileObj ?? state.lancamentosFile;
+    const contas = state.contasFile.originFileObj ?? state.contasFile;
+    formData.append('lancamentosFile', lanc, lanc.name);
+    formData.append('contasFile', contas, contas.name);
+    if (state.creditPrefixes) {
+      formData.append('creditPrefixes', state.creditPrefixes);
+    }
+    if (state.debitPrefixes) {
+      formData.append('debitPrefixes', state.debitPrefixes);
+    }
+
+    try {
+      const response = await api.post('/convert/ataloni-pagamentos', formData, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'atolini_pagamentos.txt';
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
+      }
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(err);
+      setFeatureState('converter-atolini-pagamentos', { error: 'Ocorreu um erro na conversão.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderActiveComponent = () => {
     const currentState = { ...featureStates[activeFeature], resultsRef };
 
@@ -278,6 +366,10 @@ function Dashboard() {
         return <ConversorFrancesinha {...commonProps} handleConvert={handleFrancesinhaConvert} />;
       case 'converter-receitas-acisa':
         return <ConversorReceitasAcisa {...commonProps} handleConvert={handleReceitasAcisaConvert} />;
+      case 'converter-atolini-recebimentos':
+        return <ConversorAtoliniRecebimentos {...commonProps} handleConvert={handleAtoliniRecebimentosConvert} />;
+      case 'converter-atolini-pagamentos':
+        return <ConversorAtoliniPagamentos {...commonProps} handleConvert={handleAtoliniPagamentosConvert} />;
       default:
         if (availableServices.length > 1) setView('selection');
         return null;
