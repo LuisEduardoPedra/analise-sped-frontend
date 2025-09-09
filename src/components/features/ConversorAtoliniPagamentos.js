@@ -21,7 +21,7 @@ function ConversorAtoliniPagamentos({ state, setState, handleConvert, error, isL
     <Spin spinning={isLoading} tip="Convertendo arquivos..." size="large">
       <Title level={2}>Conversor Atolini Pagamentos</Title>
       <Paragraph>
-        Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato Atolini Pagamentos.
+        Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato de importação Atolini Pagamentos.
       </Paragraph>
       <Card title="Upload de Arquivos e Filtros">
         <Row gutter={[24, 24]}>

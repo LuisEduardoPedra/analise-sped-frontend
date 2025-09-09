@@ -21,7 +21,7 @@ function ConversorAtoliniRecebimentos({ state, setState, handleConvert, error, i
     <Spin spinning={isLoading} tip="Convertendo arquivos..." size="large">
       <Title level={2}>Conversor Atolini Recebimentos</Title>
       <Paragraph>
-        Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato Atolini Recebimentos.
+        Esta ferramenta converte um arquivo de lançamentos e um plano de contas para o formato de importação Atolini Recebimentos.
       </Paragraph>
       <Card title="Upload de Arquivos e Filtros">
         <Row gutter={[24, 24]}>

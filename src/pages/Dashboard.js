@@ -283,7 +283,7 @@ function Dashboard() {
       const link = document.createElement('a');
       link.href = url;
       const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'atolini_recebimentos.txt';
+      let fileName = 'atolini_recebimentos.csv';
       if (contentDisposition) {
         const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
         if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
@@ -329,7 +329,7 @@ function Dashboard() {
       const link = document.createElement('a');
       link.href = url;
       const contentDisposition = response.headers['content-disposition'];
-      let fileName = 'atolini_pagamentos.txt';
+      let fileName = 'atolini_pagamentos.csv';
       if (contentDisposition) {
         const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
         if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
