@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Col, Row, Typography } from 'antd';
-import { CalculatorOutlined, FileTextOutlined, SwapOutlined, DollarCircleOutlined } from '@ant-design/icons'; // Ícone adicionado
+import { CalculatorOutlined, FileTextOutlined, SwapOutlined, DollarCircleOutlined, CreditCardOutlined, WalletOutlined } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 
 const { Title, Paragraph } = Typography;
@@ -34,6 +34,20 @@ const services = [
     title: 'Conversor Receitas Acisa',
     description: 'Converte planilhas de receita para o formato de importação contábil.',
     icon: <DollarCircleOutlined style={{ fontSize: '36px', color: '#13c2c2' }} />,
+  },
+  {
+    key: 'converter-atolini-recebimentos',
+    permission: 'converter-atolini-recebimentos',
+    title: 'Atolini Recebimentos',
+    description: 'Gera arquivo para importação no Atolini Recebimentos.',
+    icon: <WalletOutlined style={{ fontSize: '36px', color: '#722ed1' }} />,
+  },
+  {
+    key: 'converter-atolini-pagamentos',
+    permission: 'converter-atolini-pagamentos',
+    title: 'Atolini Pagamentos',
+    description: 'Gera arquivo para importação no Atolini Pagamentos.',
+    icon: <CreditCardOutlined style={{ fontSize: '36px', color: '#eb2f96' }} />,
   },
 ];
 

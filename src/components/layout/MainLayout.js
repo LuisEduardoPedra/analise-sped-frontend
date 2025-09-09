@@ -6,7 +6,9 @@ import {
   SwapOutlined,
   FileTextOutlined,
   HomeOutlined,
-  DollarCircleOutlined, // Novo ícone
+  DollarCircleOutlined,
+  CreditCardOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import favicon from '../../assets/icon.png';
@@ -38,6 +40,16 @@ const MainLayout = ({ children, onMenuClick, onHomeClick, activeKey, showSider }
       key: 'converter-receitas-acisa',
       icon: <DollarCircleOutlined />,
       label: 'Conversor Receitas Acisa',
+    },
+    hasPermission('converter-atolini-recebimentos') && {
+      key: 'converter-atolini-recebimentos',
+      icon: <WalletOutlined />,
+      label: 'Atolini Recebimentos',
+    },
+    hasPermission('converter-atolini-pagamentos') && {
+      key: 'converter-atolini-pagamentos',
+      icon: <CreditCardOutlined />,
+      label: 'Atolini Pagamentos',
     },
   ].filter(Boolean);
 
